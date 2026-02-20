@@ -4,32 +4,32 @@ import {
   Column,
   CreateDateColumn,
   Entity,
-  ManyToOne,
-  OneToOne,
+  OneToMany,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
 
 @Entity()
-export class User {
+export class Plan {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
-  @Column({ unique: true })
-  email: string;
+  @Column()
+  title: string;
 
   @Column()
-  name: string;
+  description: string;
 
-  @Column()
-  password: string;
+  @Column({ name: 'monthly_price' })
+  monthlyPrice: number;
 
-  @OneToOne(() => Subscription, (subscription) => subscription.user, {
-    nullable: true,
-  })
-  subscription: Subscription;
+  @Column({ name: 'yearly_price' })
+  yearlyPrice: number;
 
-  @ManyToOne(() => Payment, (payment) => payment.user)
+  @OneToMany(() => Subscription, (subscription) => subscription.plan)
+  subscriptions: Subscription[];
+
+  @OneToMany(() => Payment, (payment) => payment.plan)
   payments: Payment[];
 
   @CreateDateColumn()

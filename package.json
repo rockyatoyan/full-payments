@@ -12,6 +12,8 @@
     "start:dev": "nest start --watch",
     "start:debug": "nest start --debug --watch",
     "start:prod": "node dist/main",
+    "db:up": "docker compose up -d",
+    "db:down": "docker compose down",
     "migration:generate": "npx typeorm-ts-node-commonjs migration:generate -d src/database/data-source.ts",
     "migration:run": "npx typeorm-ts-node-commonjs migration:run -d src/database/data-source.ts",
     "migration:revert": "npx typeorm-ts-node-commonjs migration:revert -d src/database/data-source.ts",
