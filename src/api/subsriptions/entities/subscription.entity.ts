@@ -1,6 +1,7 @@
 import { User } from '../../auth/entities/user.entity';
 import { Plan } from '../../plans/entities/plan.entity';
 import {
+  Column,
   CreateDateColumn,
   Entity,
   JoinColumn,
@@ -21,6 +22,12 @@ export class Subscription {
 
   @ManyToOne(() => Plan, (plan) => plan.subscriptions, { onDelete: 'CASCADE' })
   plan: Plan;
+
+  @Column('date')
+  startDate: Date;
+
+  @Column('date')
+  endDate: Date;
 
   @CreateDateColumn()
   createdAt: Date;

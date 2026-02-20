@@ -3,9 +3,10 @@ import { AppModule } from './app.module';
 import { ConfigService } from '@nestjs/config';
 import { Logger, ValidationPipe } from '@nestjs/common';
 import * as cookieParser from 'cookie-parser';
+import { NestExpressApplication } from '@nestjs/platform-express';
 
 async function bootstrap() {
-  const app = await NestFactory.create(AppModule);
+  const app = await NestFactory.create<NestExpressApplication>(AppModule);
 
   const config = app.get(ConfigService);
   const logger = new Logger(AppModule.name);
@@ -16,6 +17,8 @@ async function bootstrap() {
   });
 
   app.use(cookieParser(config.getOrThrow<string>('COOKIE_SECRET')));
+
+  app.set('trust proxy', true);
 
   app.useGlobalPipes(new ValidationPipe({ whitelist: true }));
 

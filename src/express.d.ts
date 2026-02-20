@@ -2,6 +2,6 @@ import { User as TypeOrmUser } from '@/api/auth/entities/user.entity';
 
 declare global {
   namespace Express {
-    interface User extends Omit<TypeOrmUser, 'password'> {}
+    interface User extends TypeOrmUser {}
   }
 }
