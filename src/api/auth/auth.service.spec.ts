@@ -4,6 +4,7 @@ import { JwtModule } from '@nestjs/jwt';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { getJwtConfig } from '@/configs';
 import { SignUpDto } from './dto/sign-up.dto';
+import { User } from './entities/user.entity';
 
 describe('AuthService', () => {
   let service: AuthService;
@@ -52,14 +53,14 @@ describe('AuthService', () => {
       password: dto.password,
       createdAt: new Date(),
       updatedAt: new Date(),
-    };
+    } as User;
 
     jest.spyOn(service['userRepository'], 'findOneBy').mockResolvedValue(null);
     jest.spyOn(service['userRepository'], 'create').mockReturnValue(user);
     jest.spyOn(service['userRepository'], 'save').mockResolvedValue(user);
 
     const result = await service.signUp(dto);
-    
+
     expect({
       id: result.id,
       email: result.email,
