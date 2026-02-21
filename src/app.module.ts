@@ -3,6 +3,7 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { getDbFactory } from './configs';
 import { ApiModule } from './api/api.module';
+import { LibModule } from './lib/lib.module';
 
 @Module({
   imports: [
@@ -15,6 +16,7 @@ import { ApiModule } from './api/api.module';
       inject: [ConfigService],
     }),
     ApiModule,
+    LibModule,
   ],
 })
 export class AppModule {}

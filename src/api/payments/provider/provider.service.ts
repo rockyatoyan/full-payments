@@ -1,3 +1,4 @@
+import { MailService } from './../../../lib/mail/mail.service';
 import { Plan } from '@/api/plans/entities/plan.entity';
 import {
   BilligPeriod,
@@ -19,6 +20,7 @@ import { Subscription } from '@/api/subsriptions/entities/subscription.entity';
 export class ProviderService {
   constructor(
     private readonly youkassaService: YoukassaService,
+    private readonly mailService: MailService,
     @InjectRepository(Payment)
     private readonly paymentRepository: Repository<Payment>,
     @InjectRepository(Subscription)
@@ -49,6 +51,7 @@ export class ProviderService {
         provider: result.provider,
         raw: result.raw,
       });
+
       return true;
     }
 
@@ -138,6 +141,8 @@ export class ProviderService {
 
     const savedPayment = await this.paymentRepository.save(payment);
 
+    await this.mailService.sendPaymentSuccessEmail(payment.user, payment);
+
     return savedPayment;
   }
 
@@ -160,6 +165,8 @@ export class ProviderService {
     payment.metadata = dto.raw;
 
     const savedPayment = await this.paymentRepository.save(payment);
+
+    await this.mailService.sendPaymentFailEmail(payment.user, payment);
 
     return savedPayment;
   }
