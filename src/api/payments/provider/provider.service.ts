@@ -98,7 +98,7 @@ export class ProviderService {
     }
 
     payment.status = PaymentStatus.COMPLETED;
-    payment.externalId = externalPaymentId;
+    if (!payment.externalId) payment.externalId = externalPaymentId;
     payment.provider = provider;
     payment.metadata = raw;
 
@@ -155,12 +155,16 @@ export class ProviderService {
   }) {
     const payment = await this.paymentRepository.findOne({
       where: { id: dto.paymentId },
+      relations: {
+        plan: true,
+        user: true,
+      },
     });
     if (!payment) {
       throw new NotFoundException('Payment not found');
     }
     payment.status = PaymentStatus.FAILED;
-    payment.externalId = dto.externalPaymentId;
+    if (!payment.externalId) payment.externalId = dto.externalPaymentId;
     payment.provider = dto.provider;
     payment.metadata = dto.raw;
 

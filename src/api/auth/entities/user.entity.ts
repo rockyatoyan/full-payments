@@ -4,7 +4,7 @@ import {
   Column,
   CreateDateColumn,
   Entity,
-  ManyToOne,
+  OneToMany,
   OneToOne,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
@@ -24,12 +24,15 @@ export class User {
   @Column()
   password: string;
 
+  @Column({ nullable: true })
+  isAllowedAutoRenewal: boolean;
+
   @OneToOne(() => Subscription, (subscription) => subscription.user, {
     nullable: true,
   })
   subscription: Subscription;
 
-  @ManyToOne(() => Payment, (payment) => payment.user)
+  @OneToMany(() => Payment, (payment) => payment.user)
   payments: Payment[];
 
   @CreateDateColumn()

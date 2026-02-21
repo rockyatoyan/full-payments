@@ -2,6 +2,7 @@ import { ConfigService } from '@nestjs/config';
 import { Injectable, InternalServerErrorException } from '@nestjs/common';
 import { BaseProvider } from '../base-provider';
 import {
+  BilligPeriod,
   Payment,
   PaymentProvider,
   PaymentStatus,
@@ -12,6 +13,7 @@ import {
   type CreatePaymentRequest,
   YookassaService as NestjsYookassaService,
   PaymentStatusEnum,
+  VatCodesEnum,
 } from 'nestjs-yookassa';
 import { Plan } from '@/api/plans/entities/plan.entity';
 import { YoukassaWebhookData } from './interfaces/webhook.interface';
@@ -44,6 +46,24 @@ export class YoukassaService extends BaseProvider {
           type: ConfirmationEnum.REDIRECT,
           return_url: this.configService.getOrThrow('YOOKASSA_RETURN_URL'),
         },
+        receipt: {
+          customer: {
+            email: payment.user.email,
+            full_name: payment.user.name,
+          },
+          items: [
+            {
+              description: `Subscription to plan "${plan.title}"`,
+              quantity: 1,
+              amount: {
+                value: amount,
+                currency: CurrencyEnum.RUB,
+              },
+              vat_code: VatCodesEnum.NDS_NONE,
+            },
+          ],
+        },
+        save_payment_method: true,
         metadata: {
           planId: plan.id,
           paymentId: payment.id,
@@ -60,6 +80,56 @@ export class YoukassaService extends BaseProvider {
     } catch (error) {
       throw new InternalServerErrorException(
         `Youkassa payment initialization failed: ${error.message}`,
+      );
+    }
+  }
+
+  async initFromSavedPayment(payment: Payment, plan: Plan) {
+    try {
+      const amount =
+        payment.billingPeriod === BilligPeriod.MONTHLY
+          ? plan.monthlyPrice
+          : plan.yearlyPrice;
+
+      const paymentData: CreatePaymentRequest = {
+        amount: {
+          value: amount,
+          currency: CurrencyEnum.RUB,
+        },
+        description: `Payment for plan "${plan.title}"`,
+        capture: true,
+        receipt: {
+          customer: {
+            email: payment.user.email,
+            full_name: payment.user.name,
+          },
+          items: [
+            {
+              description: `Subscription to plan "${plan.title}"`,
+              quantity: 1,
+              amount: {
+                value: amount,
+                currency: CurrencyEnum.RUB,
+              },
+              vat_code: VatCodesEnum.NDS_NONE,
+            },
+          ],
+        },
+        payment_method_id: payment.externalId,
+        save_payment_method: true,
+        metadata: {
+          planId: plan.id,
+          paymentId: payment.id,
+        },
+      };
+
+      const newPayment =
+        await this.youkassaService.payments.create(paymentData);
+
+      return newPayment;
+    } catch (error) {
+      throw new InternalServerErrorException(
+        `Youkassa payment renewal failed: ${error.message}`,
       );
     }
   }

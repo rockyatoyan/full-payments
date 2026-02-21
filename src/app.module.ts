@@ -4,6 +4,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { getDbFactory } from './configs';
 import { ApiModule } from './api/api.module';
 import { LibModule } from './lib/lib.module';
+import { ScheduleModule } from '@nestjs/schedule';
 
 @Module({
   imports: [
@@ -15,6 +16,7 @@ import { LibModule } from './lib/lib.module';
       useFactory: getDbFactory,
       inject: [ConfigService],
     }),
+    ScheduleModule.forRoot(),
     ApiModule,
     LibModule,
   ],

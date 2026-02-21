@@ -35,6 +35,7 @@ export class PaymentsService {
       where: { id: result.identifiers[0].id },
       relations: {
         plan: true,
+        user: true,
       },
     });
 
