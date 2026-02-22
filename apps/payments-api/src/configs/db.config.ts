@@ -1,5 +1,11 @@
-import { ConfigService } from '@nestjs/config';
-import { TypeOrmModuleOptions } from '@nestjs/typeorm';
+import { ConfigService } from '@nestjs/config'
+import { TypeOrmModuleOptions } from '@nestjs/typeorm'
+import { User } from '@/api/auth/entities/user.entity'
+import { Payment } from '@/api/payments/entities/payment.entity'
+import { Subscription } from '@/api/subsriptions/entities/subscription.entity'
+import { Plan } from '@/api/plans/entities/plan.entity'
+
+export * from "pg"
 
 export const getDbFactory = (
   configService: ConfigService,
@@ -15,6 +21,6 @@ export const getDbFactory = (
 
   synchronize: false,
 
-  entities: [__dirname + '/../**/*.entity{.ts,.js}'],
+  entities: [User, Payment, Subscription, Plan],
   migrations: [__dirname + '/../migrations/**/*{.ts,.js}'],
 });

@@ -1,5 +1,5 @@
-import { Payment } from '../../payments/entities/payment.entity';
-import { Subscription } from '../../subsriptions/entities/subscription.entity';
+import { Payment } from '../../payments/entities/payment.entity'
+import { Subscription } from '../../subsriptions/entities/subscription.entity'
 import {
   Column,
   CreateDateColumn,
@@ -8,7 +8,7 @@ import {
   OneToOne,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
-} from 'typeorm';
+} from 'typeorm'
 
 @Entity()
 export class User {

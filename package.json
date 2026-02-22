@@ -6,23 +6,16 @@
   "private": true,
   "license": "UNLICENSED",
   "scripts": {
-    "build": "nest build",
-    "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",
-    "start": "nest start",
-    "start:dev": "nest start --watch",
-    "start:debug": "nest start --debug --watch",
-    "start:prod": "node dist/main",
-    "services:up": "docker compose up -d",
-    "services:down": "docker compose down",
-    "db:seed": "ts-node src/database/seed.ts",
-    "migration:generate": "npx typeorm-ts-node-commonjs migration:generate -d src/database/data-source.ts",
-    "migration:run": "npx typeorm-ts-node-commonjs migration:run -d src/database/data-source.ts",
-    "migration:revert": "npx typeorm-ts-node-commonjs migration:revert -d src/database/data-source.ts",
-    "email:dev": "email dev --dir src/lib/mail/templates",
-    "lint": "eslint \"{src,apps,libs,test}/**/*.ts\" --fix",
-    "test": "jest",
-    "test:watch": "jest --watch",
-    "test:cov": "jest --coverage"
+    "start:prod": "npx nx run full-payments:start:prod",
+    "down:prod": "npx nx run full-payments:down:prod",
+    "api:dev": "npx nx run payments-api:serve:development",
+    "services:up": "docker compose -f docker-compose.dev.yml --env-file=apps/payments-api/.env up -d",
+    "services:down": "docker compose -f docker-compose.dev.yml --env-file=apps/payments-api/.env down",
+    "db:seed": "npx nx run payments-api:db:seed",
+    "migration:generate": "nx run payments-api:migration:generate",
+    "migration:run": "nx run payments-api:migration:run",
+    "migration:revert": "nx run payments-api:migration:revert",
+    "email:dev": "nx run payments-api:email:dev"
   },
   "dependencies": {
     "@nestjs-modules/mailer": "^2.0.2",
@@ -52,6 +45,7 @@
     "react-dom": "19.2.4",
     "reflect-metadata": "^0.2.2",
     "rxjs": "^7.8.1",
+    "tslib": "^2.3.0",
     "typeorm": "^0.3.28"
   },
   "devDependencies": {
@@ -60,9 +54,17 @@
     "@nestjs/cli": "^11.0.0",
     "@nestjs/schematics": "^11.0.0",
     "@nestjs/testing": "^11.0.1",
+    "@nx/jest": "22.5.2",
+    "@nx/js": "22.5.2",
+    "@nx/nest": "^22.5.2",
+    "@nx/node": "22.5.2",
+    "@nx/web": "22.5.2",
+    "@nx/webpack": "22.5.2",
     "@react-email/preview-server": "5.2.8",
+    "@swc-node/register": "~1.11.1",
     "@swc/cli": "^0.6.0",
-    "@swc/core": "^1.10.7",
+    "@swc/core": "~1.15.5",
+    "@swc/helpers": "~0.5.18",
     "@types/cookie-parser": "^1.4.10",
     "@types/express": "^5.0.0",
     "@types/jest": "^29.5.14",
@@ -76,7 +78,10 @@
     "eslint-plugin-prettier": "^5.2.2",
     "globals": "^16.0.0",
     "jest": "^29.7.0",
-    "prettier": "^3.4.2",
+    "jest-environment-node": "^29.7.0",
+    "jest-util": "^29.7.0",
+    "nx": "22.5.2",
+    "prettier": "~3.6.2",
     "react-email": "5.2.8",
     "source-map-support": "^0.5.21",
     "supertest": "^7.0.0",
@@ -85,6 +90,33 @@
     "ts-node": "^10.9.2",
     "tsconfig-paths": "^4.2.0",
     "typescript": "^5.7.3",
-    "typescript-eslint": "^8.20.0"
+    "typescript-eslint": "^8.20.0",
+    "webpack-cli": "^5.1.4"
+  },
+  "nx": {
+    "targets": {
+      "start:prod": {
+        "executor": "nx:run-commands",
+        "options": {
+          "commands": [
+            "npx nx run-many -t build",
+            "docker compose -f docker-compose.prod.yml --env-file=apps/payments-api/.env.prod build --no-cache",
+            "docker-compose -f docker-compose.prod.yml --env-file=apps/payments-api/.env.prod up postgres redis -d",
+            "npm run migration:run",
+            "docker-compose -f docker-compose.prod.yml --env-file=apps/payments-api/.env.prod up -d"
+          ],
+          "parallel": false
+        }
+      },
+      "down:prod": {
+        "executor": "nx:run-commands",
+        "options": {
+          "commands": [
+            "docker-compose -f docker-compose.prod.yml --env-file=apps/payments-api/.env.prod down"
+          ],
+          "parallel": false
+        }
+      }
+    }
   }
 }

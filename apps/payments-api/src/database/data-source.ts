@@ -1,7 +1,7 @@
-import 'reflect-metadata';
-import 'dotenv/config';
+import 'reflect-metadata'
+import 'dotenv/config'
 
-import { DataSource } from 'typeorm';
+import { DataSource } from 'typeorm'
 
 export const AppDataSource = new DataSource({
   type: 'postgres',
@@ -14,6 +14,6 @@ export const AppDataSource = new DataSource({
   synchronize: false,
   logging: false,
 
-  entities: ['src/**/*.entity{.js,.ts}'],
-  migrations: ['src/database/migrations/*{.js,.ts}'],
+  entities: [__dirname + '/../**/*.entity{.js,.ts}'],
+  migrations: [__dirname + '/migrations/*{.js,.ts}'],
 });

@@ -1,0 +1,65 @@
+services:
+  postgres:
+    container_name: prod-payments-postgres
+    image: postgres:17
+    env_file: ./apps/payments-api/.env.prod
+    environment:
+      POSTGRES_USER: ${DB_USERNAME}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+      POSTGRES_DB: ${DB_NAME}
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USERNAME} -d ${DB_NAME}"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+      start_period: 30s
+    restart: always
+    ports:
+      - "5433:5432"
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    networks:
+      - payments-network
+
+  redis:
+    container_name: prod-payments-redis
+    image: redis:7
+    env_file: ./apps/payments-api/.env.prod
+    command: redis-server --requirepass ${REDIS_PASSWORD}
+    healthcheck:
+      test: ["CMD", "redis-cli", "-a", "${REDIS_PASSWORD}", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+      start_period: 10s
+    restart: always
+    volumes:
+      - payments-prod-redis-data:/redis-data
+    ports:
+      - "6379:6379"
+    networks:
+      - payments-network
+
+  api:
+    container_name: prod-payments-api
+    build:
+      context: apps/payments-api
+      dockerfile: Dockerfile
+    env_file: ./apps/payments-api/.env.prod
+    ports:
+      - "${HTTP_PORT:-4000}:${HTTP_PORT:-4000}"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - payments-network
+
+networks:
+  payments-network:
+    driver: bridge
+
+volumes:
+  postgres-data:
+  payments-prod-redis-data:
